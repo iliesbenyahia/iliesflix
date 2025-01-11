@@ -67,9 +67,9 @@ Traefik routes all services with base path URLs (e.g., `yourdomain/sonarr`).
    ```
 
 2. **Configure Volumes**
-   - The stack uses an NFS-mounted directory on your NAS to store media files. Each service’s media path points to a specific subdirectory within this NAS mount. This setup ensures compatibility with hardlinks and instant moves, as described in the [Trash Guides](https://trash-guides.info/File-and-Folder-Structure/Hardlinks-and-Instant-Moves/).
+   - The stack uses an NFS-mounted directory on your NAS (or any other storage)  to store media files. Each service’s media path points to a specific subdirectory within this NAS/storage mount. This setup ensures compatibility with hardlinks and instant moves, as described in the [Trash Guides](https://trash-guides.info/File-and-Folder-Structure/Hardlinks-and-Instant-Moves/).
    
-     - Example directory structure on your NAS:
+     - Example directory structure on your NAS (or any other storage):
        ```
        /srv/nas/
        ├── downloads/
