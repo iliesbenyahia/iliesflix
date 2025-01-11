@@ -1,4 +1,4 @@
-![Iliesflix in Action](./iliesflix.gif)
+![Iliesflix in Action](./misc/iliesflix-logo.gif)
 
 # Iliesflix: Media Management Stack
 
