@@ -1,0 +1,144 @@
+services:
+  sonarr:
+    image: ghcr.io/hotio/sonarr
+    container_name: sonarr
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=002
+      - TZ=Europe/Paris
+    volumes:
+      - ./sonarr/config:/config
+      - /srv/nas:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=(Host(`debian-docker.lan`) || Host(`docker.lan`) || Host(`debian-docker`)) && PathPrefix(`/sonarr`)" 
+      - "traefik.http.routers.sonarr.service=sonarr"
+      - "traefik.http.routers.sonarr.entrypoints=web"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+  radarr:
+    image: ghcr.io/hotio/radarr
+    container_name: radarr
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=002
+      - TZ=Europe/Paris
+    volumes:
+      - ./radarr/config:/config
+      - /srv/nas:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.rule=(Host(`debian-docker.lan`) || Host(`docker.lan`) || Host(`debian-docker`)) && PathPrefix(`/radarr`)"
+      - "traefik.http.routers.radarr.service=radarr"
+      - "traefik.http.routers.radarr.entrypoints=web"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
+  prowlarr:
+    container_name: prowlarr
+    restart: unless-stopped
+    image: ghcr.io/hotio/prowlarr
+    networks:
+      - traefik
+    volumes:
+      - ./prowlarr/config:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prowlarr.rule=(Host(`debian-docker.lan`) || Host(`docker.lan`) || Host(`debian-docker`)) && PathPrefix(`/prowlarr`)" 
+      - "traefik.http.routers.prowlarr.service=prowlarr"
+      - "traefik.http.routers.prowlarr.entrypoints=web"
+      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
+  qbittorrent:
+    container_name: qbittorrent
+    restart: unless-stopped
+    image: ghcr.io/hotio/qbittorrent
+    networks:
+      - traefik
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=002
+      - TZ=Etc/UTC
+      - WEBUI_PORTS=8080/tcp,8080/udp
+    volumes:
+      - ./qbittorrent/config:/config
+      - /srv/nas/torrents:/data/torrents
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.qbittorrent.rule=Host(`qbittorrent.debian-docker.lan`) || Host(`qbittorrent.docker.lan`) " # change with your own domain/sub domain
+      - "traefik.http.routers.qbittorrent.service=qbittorrent"
+      - "traefik.http.routers.qbittorrent.entrypoints=web"
+      - "traefik.http.services.qbittorrent.loadbalancer.server.port=8080"
+  #bazarr:
+  #  container_name: bazarr
+  #  image: ghcr.io/hotio/bazarr
+
+  #  ports:
+  #    - "6767"
+  #  networks:
+  #    - traefik
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- UMASK=002
+      #- TZ=Etc/UTC
+      #- WEBUI_PORTS=6767/tcp,6767/udp
+  #  volumes:
+  #    - ./bazarr/config:/config
+  #    - /srv/nas:/data
+  #  labels:
+  #    - "traefik.enable=true"
+  #    - "traefik.http.routers.bazarr.rule=Host(`bazarr.debian-docker.lan`) || Host(`bazarr.docker.lan`) " # change with your own domain/sub domain
+  #    - "traefik.http.routers.bazarr.service=bazarr"
+  #    - "traefik.http.routers.bazarr.entrypoints=web"
+  #    - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
+  jellyfin:
+    container_name: jellyfin
+    image: ghcr.io/hotio/jellyfin
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=002
+      - TZ=Etc/UTC
+    networks:
+      - traefik
+    volumes:
+      - ./jellyfin/config:/config
+      - /srv/nas/medias:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyfin.rule=(Host(`debian-docker.lan`) || Host(`docker.lan`) || Host(`debian-docker`)) && PathPrefix(`/jellyfin`)" 
+      - "traefik.http.routers.jellyfin.service=jellyfin"
+      - "traefik.http.routers.jellyfin.entrypoints=web"
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+  jellyseerr:
+    container_name: jellyseerr
+    image: ghcr.io/hotio/jellyseerr
+    restart: unless-stopped
+    #ports:
+    #  - "5055:5055"
+    networks:
+      - traefik
+    environment:
+      - PUID=1000
+      - PGID=1000 
+      - UMASK=002
+      - TZ=Etc/UTC
+    volumes:
+      - ./jellyserr/config:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyseerr.rule=Host(`jellyseerr.debian-docker.lan`) || Host(`jellyseerr.docker.lan`) " # change with your own domain/sub domain
+      - "traefik.http.routers.jellyseerr.service=jellyseerr"
+      - "traefik.http.routers.jellyseerr.entrypoints=web"
+      - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
+networks:
+  traefik:
+    name: traefik
+    external: true
