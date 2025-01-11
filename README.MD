@@ -1,3 +1,5 @@
+![Iliesflix in Action](./iliesflix.gif)
+
 # Iliesflix: Media Management Stack
 
 Iliesflix is a self-hosted media management stack built with Docker containers. The stack includes Sonarr, Radarr, Jellyfin, and more, all routed through Traefik as a reverse proxy. This setup allows you to access services via `yourdomain/servicename`.
