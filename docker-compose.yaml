@@ -56,15 +56,33 @@ services:
   qbittorrent:
     container_name: qbittorrent
     restart: unless-stopped
-    image: ghcr.io/hotio/qbittorrent
+    image: ghcr.io/hotio/qbittorrent:legacy-4.3.9
     networks:
       - traefik
     environment:
+      - VPN_ENABLED=true #
+      - VPN_CONF=wg0 # READ THIS
+      - VPN_PROVIDER=proton #
+      - VPN_LAN_NETWORK=192.168.1.0/24 #
+      - VPN_LAN_LEAK_ENABLED=false
+      - VPN_EXPOSE_PORTS_ON_LAN #
+      - VPN_AUTO_PORT_FORWARD=true #
+      - VPN_AUTO_PORT_FORWARD_TO_PORTS= #
+      - VPN_KEEP_LOCAL_DNS=false #
+      - VPN_FIREWALL_TYPE=auto #
+      - VPN_HEALTHCHECK_ENABLED=false
+      - PRIVOXY_ENABLED=false
+      - UNBOUND_ENABLED=false #  
       - PUID=1000
       - PGID=1000
       - UMASK=002
       - TZ=Etc/UTC
       - WEBUI_PORTS=8080/tcp,8080/udp
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1 #
+      - net.ipv6.conf.all.disable_ipv6=1 #  
     volumes:
       - ./qbittorrent/config:/config
       - /srv/nas/torrents:/data/torrents
@@ -74,29 +92,6 @@ services:
       - "traefik.http.routers.qbittorrent.service=qbittorrent"
       - "traefik.http.routers.qbittorrent.entrypoints=web"
       - "traefik.http.services.qbittorrent.loadbalancer.server.port=8080"
-  #bazarr:
-  #  container_name: bazarr
-  #  image: ghcr.io/hotio/bazarr
-
-  #  ports:
-  #    - "6767"
-  #  networks:
-  #    - traefik
-    #environment:
-      #- PUID=1000
-      #- PGID=1000
-      #- UMASK=002
-      #- TZ=Etc/UTC
-      #- WEBUI_PORTS=6767/tcp,6767/udp
-  #  volumes:
-  #    - ./bazarr/config:/config
-  #    - /srv/nas:/data
-  #  labels:
-  #    - "traefik.enable=true"
-  #    - "traefik.http.routers.bazarr.rule=Host(`bazarr.debian-docker.lan`) || Host(`bazarr.docker.lan`) " # change with your own domain/sub domain
-  #    - "traefik.http.routers.bazarr.service=bazarr"
-  #    - "traefik.http.routers.bazarr.entrypoints=web"
-  #    - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
   jellyfin:
     container_name: jellyfin
     image: ghcr.io/hotio/jellyfin
@@ -138,7 +133,40 @@ services:
       - "traefik.http.routers.jellyseerr.service=jellyseerr"
       - "traefik.http.routers.jellyseerr.entrypoints=web"
       - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
+  joal:
+    image: anthonyraymond/joal:latest
+    container_name: joal
+    restart: unless-stopped
+    networks:
+      - traefik
+    volumes:
+      - ./joal:/data
+    command: ["--joal-conf=/data", "--spring.main.web-environment=true", "--server.port=80", "--joal.ui.path.prefix=secret", "--joal.ui.secret-token=token"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.joal.rule=Host(`joal.debian-docker.lan`) || Host(`joal.docker.lan`) " # change with your own domain/sub domain
+      - "traefik.http.routers.joal.service=joal"
+      - "traefik.http.routers.joal.entrypoints=web"
+      - "traefik.http.services.joal.loadbalancer.server.port=80"
+  flaresolverr: #pour outrepasser cloudflare sur un certain tracker de torrent privé dont je tairais le nom (commençant par y et finissant par gg)
+    image: alexfozor/flaresolverr:pr-1300-experimental
+    container_name: flaresolverr
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - LOG_LEVEL=debug
+      - LOG_HTML=true
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - TZ=Europe/Paris
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flaresolverr.rule=Host(`flaresolverr.debian-docker.lan`) || Host(`flaresolverr.docker.lan`) " # change with your own domain/sub domain
+      - "traefik.http.routers.flaresolverr.service=flaresolverr"
+      - "traefik.http.routers.flaresolverr.entrypoints=web"
+      - "traefik.http.services.flaresolverr.loadbalancer.server.port=8191"
 networks:
   traefik:
     name: traefik
     external: true
+  

@@ -35,8 +35,9 @@ Iliesflix uses Docker to deploy a collection of media tools behind a Traefik rev
 - **Radarr**: Movie management.
 - **Jellyfin**: Media streaming server.
 - **Prowlarr**: Indexer manager.
-- **qBittorrent**: Torrent client.
+- **qBittorrent**: Torrent client (image has a built in vpn support)
 - **Jellyseerr**: Request management for Jellyfin.
+- **Joal**: Fake seeder on torrents, not sharing is not cool i know :
 
 ### Traefik Configuration
 Traefik routes all services with base path URLs (e.g., `yourdomain/sonarr`).
@@ -117,6 +118,14 @@ Traefik routes all services with base path URLs (e.g., `yourdomain/sonarr`).
 ### Adding New Services
 - Follow the pattern in `docker-compose.yml` to add new services with Traefik routing.
 
+### VPN 
+- I personnaly use ProtonVPN. The qbittorrent image used here is from hotio.dev and has builtin support for it. You'll need to download your wireguard conf from your vpn provider and put it in the right folder (qbitorrent/wireguard/wg0.conf for instance). Check here : `https://hotio.dev/containers/qbittorrent/` 
+
+### Joal
+- Joal is useful when you download torrents from private trackers and when it's too difficult for you to seed as much as you leech. Indeed, these trackers check that you are sharing at least as much as you downloads. But it can be hard to seed has much, especially when your upload speed is low ... Do i need to justify myself ?   
+If you want to use Joal, you'll need to download and unpack different torrent clients and a config.json file : `https://github.com/anthonyraymond/joal/`
+Check the readme for more details (or feel free to ask me :) ! )
+
 ---
 
 ## Troubleshooting
@@ -142,4 +151,5 @@ Traefik routes all services with base path URLs (e.g., `yourdomain/sonarr`).
 - **Radarr**: [https://radarr.video/](https://radarr.video/)
 - **Jellyfin**: [https://jellyfin.org/](https://jellyfin.org/)
 - **Traefik**: [https://traefik.io/](https://traefik.io/)
+- **Joal**: [https://github.com/anthonyraymond/joal/](https://github.com/anthonyraymond/joal/)
 - **TrashGuides**: [https://trash-guides.info/](https://trash-guides.info)
